@@ -26,7 +26,7 @@ from segmentation_on_pics_light import segmentation_on_pics_light
 data_path = r'd:\Profile\a3536\Eigene Dateien\GitHub\HIDA_Hackathon\data'
 path_data_train = data_path + r'\data_train' # change to your data folder with .npy files
 # dirs created
-path_data_train_masked = data_path + r'\data_train_masked'
+path_data_train_masked = data_path + r'\data_train_masked' # files for further processes will be here!
 path_pics_masked = data_path + r'\pics_masked' # leave bc it gets used later again
 path_pics_rgb = data_path + r'\pics_rgb' # leave bc it gets used later again
 path_pics_nir = data_path + r'\pics_nir' # leave bc it gets used later again
@@ -70,28 +70,30 @@ for file_name in all_files:
         image = Image.fromarray(image_RGB.astype('uint8')).convert('RGB')
         image.save(path_pics_rgnir_file)
     print('done creating .jpg files from .npv for RGB and NIR and RGNIR')
-
+    
+    anns = []
     path_pics_masked_file = path_pics_masked + '\\' + file_name[:-4] + '.jpg'
-    if not os.path.isfile(path_pics_masked_file):
-        mask = segmentation_on_pics_light(RGNIR_src_img_bgr,path_pics_masked_file)
-    anns = mask
-    # if len(anns) == 0:
-    #     return
-    sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
-
-    img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
-    img[:,:,3] = 0
-    for ann in sorted_anns:
-        m = ann['segmentation']
-        # color_mask = np.concatenate([np.random.random(3), [0.35]])
-        color_mask = random.randint(1000000,9999999)
-        img[m] = color_mask
-    # img[:,:,0]
-    # ax.imshow(img)
-    newdata = np.concatenate([data,img[:,:,0:1]],axis=2)
     path_data_train_masked_file = path_data_train_masked + '\\' + file_name[:-4] + '.npy'
-    with open(path_data_train_masked_file, 'wb') as f:
-        np.save(f, newdata)
+    if not os.path.isfile(path_pics_masked_file) or not os.path.isfile(path_data_train_masked_file):
+        anns = segmentation_on_pics_light(RGNIR_src_img_bgr,path_pics_masked_file)
+        # if len(anns) == 0:
+        #     return
+        sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
+        
+        img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
+        img[:,:,3] = 0
+        for ann in sorted_anns:
+            m = ann['segmentation']
+            # color_mask = np.concatenate([np.random.random(3), [0.35]])
+            color_mask = np.random.random(1)
+            img[m] = color_mask
+        newdata = np.concatenate([data,img[:,:,0:1]],axis=2)
+        path_data_train_masked_file = path_data_train_masked + '\\' + file_name[:-4] + '.npy'
+        with open(path_data_train_masked_file, 'wb') as f:
+            np.save(f, newdata)
+    else:
+        pass
+    # asx
 
 #%% segmentation
 # import os

@@ -14,8 +14,6 @@ from segment_anything import SamAutomaticMaskGenerator, SamPredictor, sam_model_
 import torchvision
 import os
 
-# path_fig = r'd:\Profile\a3536\Eigene Dateien\GitHub\HIDA_Hackathon\data\pics_train\DJI_0003_R.jpg'
-
 def show_anns(anns):
     if len(anns) == 0:
         return
